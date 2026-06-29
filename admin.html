@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Панель сотрудника — E-Bike Master</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        /* ===== ОБЩИЕ СТИЛИ ДЛЯ АДМИНКИ ===== */
+        .admin-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #e8f0fe 0%, #f0f4f9 100%);
+            padding: 20px;
+        }
+
+        .admin-box {
+            background: #ffffff;
+            padding: 40px 35px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid #e8edf5;
+        }
+
+        .admin-box .logo-text {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #0077be, #5b3cc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .admin-box .page-subtitle {
+            color: #6a7f9a;
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+
+        .admin-box input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid #d0dce8;
+            background: #f8faff;
+            color: #1a2634;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+            margin-bottom: 14px;
+        }
+
+        .admin-box input:focus {
+            border-color: #0077be;
+            box-shadow: 0 0 20px rgba(0, 119, 190, 0.08);
+            background: #ffffff;
+        }
+
+        .admin-box .btn {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .admin-box .error-msg {
+            color: #dc3545;
+            font-size: 14px;
+            min-height: 28px;
+            margin-top: 4px;
+        }
+
+        .admin-box .back-link {
+            color: #8a9fb0;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+            display: inline-block;
+            margin-top: 6px;
+        }
+
+        .admin-box .back-link:hover {
+            color: #0077be;
+        }
+
+        /* ===== ПАНЕЛЬ С ЗАПИСЯМИ ===== */
+        .admin-panel {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        /* Шапка админки */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 20px 0;
+            border-bottom: 1px solid #e8edf5;
+            margin-bottom: 25px;
+        }
+
+        .admin-header .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #0077be, #5b3cc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .admin-header .admin-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a2634;
+        }
+
+        .admin-header .admin-title span {
+            color: #0077be;
+        }
+
+        .admin-header .logout-btn {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .admin-header .logout-btn:hover {
+            background: #c82333;
+            transform: scale(1.02);
+        }
+
+        /* ===== СТАТИСТИКА ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8faff;
+            border-radius: 14px;
+            padding: 18px 20px;
+            text-align: center;
+            border: 1px solid #e8edf5;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: #0077be;
+        }
+
+        .stat-card .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #0077be;
+            line-height: 1.2;
+        }
+
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: #6a7f9a;
+            margin-top: 4px;
+        }
+
+        /* ===== ТАБЛИЦА ===== */
+        .table-wrap {
+            overflow-x: auto;
+            background: #f8faff;
+            border-radius: 16px;
+            border: 1px solid #e8edf5;
+        }
+
+        .table-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 750px;
+        }
+
+        .table-wrap table th {
+            background: linear-gradient(135deg, #0077be, #5b3cc4);
+            color: #fff;
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .table-wrap table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e8edf5;
+            color: #2a3a50;
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        .table-wrap table tr:hover td {
+            background: #e8f0fe;
+        }
+
+        .table-wrap table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .no-bookings {
+            text-align: center;
+            color: #8a9fb0;
+            padding: 40px;
+            font-size: 15px;
+        }
+
+        /* ===== ВЫБОР СТАТУСА ===== */
+        .status-select {
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid #d0dce8;
+            background: #ffffff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+            min-width: 110px;
+        }
+
+        .status-select:focus {
+            border-color: #0077be;
+            box-shadow: 0 0 10px rgba(0, 119, 190, 0.1);
+        }
+
+        .status-select option {
+            padding: 4px 8px;
+        }
+
+        /* ===== КНОПКА УДАЛЕНИЯ ===== */
+        .delete-btn {
+            background: rgba(220, 53, 69, 0.08);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.15);
+            padding: 4px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        /* ===== ПАРАМЕТРЫ АКБ В ТАБЛИЦЕ ===== */
+        .battery-info {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .battery-info strong {
+            color: #1a2634;
+        }
+
+        .battery-info .battery-price {
+            color: #0077be;
+            font-weight: 700;
+        }
+
+        .battery-info .battery-meta {
+            color: #6a7f9a;
+        }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 700px) {
+            .admin-box {
+                padding: 30px 20px;
+            }
+
+            .admin-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .admin-header .admin-title {
+                font-size: 18px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-card .stat-number {
+                font-size: 26px;
+            }
+
+            .table-wrap table {
+                font-size: 12px;
+                min-width: 600px;
+            }
+
+            .table-wrap table th,
+            .table-wrap table td {
+                padding: 8px 10px;
+            }
+
+            .status-select {
+                font-size: 11px;
+                min-width: 90px;
+                padding: 2px 6px;
+            }
+        }
+
+        @media (max-width: 450px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== СТРАНИЦА ВХОДА ===== -->
+    <div class="admin-page" id="loginPage">
+        <div class="admin-box" id="loginBox">
+            <div class="logo-text">⚡ E-Bike Master</div>
+            <p class="page-subtitle">🔐 Вход для сотрудников</p>
+            
+            <input type="password" id="adminPasswordPage" placeholder="Введите пароль" />
+            <button class="btn" id="adminLoginPageBtn">Войти</button>
+            <div class="error-msg" id="adminErrorPage"></div>
+            
+            <a href="index.html" class="back-link">← На главную</a>
+        </div>
+    </div>
+
+    <!-- ===== ПАНЕЛЬ УПРАВЛЕНИЯ ===== -->
+    <div class="admin-panel" id="adminPanelPage">
+
+        <!-- Шапка -->
+        <div class="admin-header">
+            <div class="logo-text">⚡ E-Bike Master</div>
+            <div class="admin-title">📋 <span>Записи</span> клиентов</div>
+            <button class="logout-btn" id="adminLogoutPageBtn">🚪 Выйти</button>
+        </div>
+
+        <!-- Статистика -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-number" id="statTotal">0</div>
+                <div class="stat-label">Всего записей</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statToday">0</div>
+                <div class="stat-label">За сегодня</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statWeek">0</div>
+                <div class="stat-label">За 7 дней</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statMonth">0</div>
+                <div class="stat-label">За 30 дней</div>
+            </div>
+        </div>
+
+        <!-- Таблица -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Клиент</th>
+                        <th>Телефон</th>
+                        <th>Мастерская</th>
+                        <th>Дата</th>
+                        <th>Время</th>
+                        <th>🔋 АКБ</th>
+                        <th>Статус</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingsListPage">
+                    <tr><td colspan="8" class="no-bookings">📭 Нет записей</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p style="text-align: center; color: #8a9fb0; font-size: 13px; margin-top: 20px;">
+            💾 Данные хранятся в вашем браузере (localStorage)
+        </p>
+    </div>
+
+    <script>
+        // ====== УПРАВЛЕНИЕ ЗАПИСЯМИ ======
+        const STORAGE_KEY = 'ebikeBookings';
+
+        function getBookings() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveBookings(bookings) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+        }
+
+        function deleteBooking(id) {
+            let bookings = getBookings();
+            bookings = bookings.filter(b => b.id !== id);
+            saveBookings(bookings);
+        }
+
+        function updateBookingStatus(id, newStatus) {
+            const bookings = getBookings();
+            const booking = bookings.find(b => b.id === id);
+            if (booking) {
+                booking.status = newStatus;
+                saveBookings(bookings);
+            }
+        }
+
+        // ====== СТАТИСТИКА ======
+        function updateStats(bookings) {
+            const today = new Date().toISOString().split('T')[0];
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            const monthAgo = new Date();
+            monthAgo.setDate(monthAgo.getDate() - 30);
+
+            const total = bookings.length;
+            const todayCount = bookings.filter(b => b.date === today).length;
+            const weekCount = bookings.filter(b => b.date >= weekAgo.toISOString().split('T')[0]).length;
+            const monthCount = bookings.filter(b => b.date >= monthAgo.toISOString().split('T')[0]).length;
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statToday').textContent = todayCount;
+            document.getElementById('statWeek').textContent = weekCount;
+            document.getElementById('statMonth').textContent = monthCount;
+        }
+
+        // ====== ОТОБРАЖЕНИЕ ТАБЛИЦЫ ======
+        function renderBookingsTable() {
+            const bookings = getBookings();
+            const tbody = document.getElementById('bookingsListPage');
+
+            updateStats(bookings);
+
+            if (bookings.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="no-bookings">📭 Нет записей</td></tr>`;
+                return;
+            }
+
+            const sorted = [...bookings].sort((a, b) => {
+                return new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time);
+            });
+
+            // Статусы
+            const statusOptions = [
+                { value: 'new', label: '🆕 Новая' },
+                { value: 'work', label: '🔧 В работе' },
+                { value: 'done', label: '✅ Готово' }
+            ];
+
+            tbody.innerHTML = sorted.map(b => {
+                let batteryHtml = '—';
+                if (b.batteryVoltage || b.batteryCapacity) {
+                    batteryHtml = `
+                        <div class="battery-info">
+                            <strong>${b.batteryVoltage || '—'}</strong> / 
+                            <strong>${b.batteryCapacity || '—'}</strong><br>
+                            <span class="battery-meta">${b.batteryType || '—'}</span><br>
+                            <span class="battery-price">${b.batteryPrice || '—'}</span>
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <tr>
+                        <td><strong>${b.name}</strong></td>
+                        <td>${b.phone}</td>
+                        <td>${b.workshop}</td>
+                        <td>${b.date}</td>
+                        <td>${b.time}</td>
+                        <td>${batteryHtml}</td>
+                        <td>
+                            <select class="status-select" data-id="${b.id}">
+                                ${statusOptions.map(s => `
+                                    <option value="${s.value}" ${b.status === s.value ? 'selected' : ''}>
+                                        ${s.label}
+                                    </option>
+                                `).join('')}
+                            </select>
+                        </td>
+                        <td><button class="delete-btn" data-id="${b.id}">✕ Удалить</button></td>
+                    </tr>
+                `;
+            }).join('');
+
+            // ====== ОБРАБОТЧИКИ ======
+
+            // Изменение статуса
+            document.querySelectorAll('.status-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const id = Number(this.dataset.id);
+                    const newStatus = this.value;
+                    updateBookingStatus(id, newStatus);
+                    // Обновляем статистику без перерисовки всей таблицы
+                    updateStats(getBookings());
+                    // Показываем уведомление
+                    showToast('Статус обновлён');
+                });
+            });
+
+            // Удаление записи
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (confirm('Удалить запись?')) {
+                        const id = Number(this.dataset.id);
+                        deleteBooking(id);
+                        renderBookingsTable();
+                        showToast('Запись удалена');
+                    }
+                });
+            });
+        }
+
+        // ====== УВЕДОМЛЕНИЕ (TOAST) ======
+        function showToast(message) {
+            const existing = document.querySelector('.toast-notification');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = `✅ ${message}`;
+            Object.assign(toast.style, {
+                position: 'fixed',
+                bottom: '30px',
+                right: '30px',
+                background: '#0077be',
+                color: '#fff',
+                padding: '12px 24px',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                boxShadow: '0 4px 20px rgba(0,119,190,0.3)',
+                zIndex: '9999',
+                opacity: '0',
+                transform: 'translateY(20px)',
+                transition: 'all 0.4s ease'
+            });
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            }, 50);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 400);
+            }, 2500);
+        }
+
+        // ====== АВТОРИЗАЦИЯ ======
+        const ADMIN_PASSWORD = 'admin123';
+        const loginPage = document.getElementById('loginPage');
+        const adminPanel = document.getElementById('adminPanelPage');
+
+        document.getElementById('adminLoginPageBtn').addEventListener('click', function() {
+            const password = document.getElementById('adminPasswordPage').value;
+            const errorEl = document.getElementById('adminErrorPage');
+
+            if (password === ADMIN_PASSWORD) {
+                loginPage.style.display = 'none';
+                adminPanel.classList.add('active');
+                renderBookingsTable();
+                errorEl.textContent = '';
+            } else {
+                errorEl.textContent = '❌ Неверный пароль! Попробуйте снова.';
+            }
+        });
+
+        document.getElementById('adminPasswordPage').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('adminLoginPageBtn').click();
+            }
+        });
+
+        document.getElementById('adminLogoutPageBtn').addEventListener('click', function() {
+            loginPage.style.display = 'flex';
+            adminPanel.classList.remove('active');
+            document.getElementById('adminPasswordPage').value = '';
+            document.getElementById('adminErrorPage').textContent = '';
+        });
+    </script>
+
+</body>
+</html>
